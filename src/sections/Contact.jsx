@@ -6,19 +6,41 @@ const Contact = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState('idle'); // idle | loading | success
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
 
     setStatus('loading');
     
-    // Simulate futuristic transmission delay
-    setTimeout(() => {
-      setStatus('success');
-      setFormData({ name: '', email: '', message: '' });
-    }, 1800);
-  };
+    try {
+      // Sending data to your Formspree endpoint
+      const response = await fetch("https://formspree.io/f/mykawawg", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message
+        })
+      });
 
+      if (response.ok) {
+        // Keeps your awesome UI animation intact
+        setStatus('success');
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        console.error("Form submission failed");
+        setStatus('idle');
+        alert("Transmission failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      setStatus('idle');
+      alert("Network error. Please check your connection.");
+    }
+  };
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
